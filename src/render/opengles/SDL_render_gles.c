@@ -264,10 +264,12 @@ static GLenum GetBlendEquation(SDL_BlendOperation operation)
         return GL_FUNC_SUBTRACT_OES;
     case SDL_BLENDOPERATION_REV_SUBTRACT:
         return GL_FUNC_REVERSE_SUBTRACT_OES;
+#ifndef __SYMBIAN32__
     case SDL_BLENDOPERATION_MINIMUM:
         return GL_MIN_EXT;
     case SDL_BLENDOPERATION_MAXIMUM:
         return GL_MAX_EXT;
+#endif
     default:
         return GL_INVALID_ENUM;
     }

@@ -35,6 +35,11 @@
 #include <atomic.h>
 #endif
 
+#if defined(__SYMBIAN32__) && defined(__SERIES60_3X__)
+#include <e32atomics.h>
+#define HAVE_E32_ATOMICS
+#endif
+
 /* The __atomic_load_n() intrinsic showed up in different times for different compilers. */
 #if defined(__clang__)
 #if __has_builtin(__atomic_load_n) || defined(HAVE_GCC_ATOMICS)
@@ -129,6 +134,8 @@ SDL_bool SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval)
 #ifdef HAVE_MSC_ATOMICS
     SDL_COMPILE_TIME_ASSERT(atomic_cas, sizeof(long) == sizeof(a->value));
     return _InterlockedCompareExchange((long *)&a->value, (long)newval, (long)oldval) == (long)oldval;
+#elif defined(HAVE_E32_ATOMICS)
+    return (SDL_bool)__e32_atomic_cas_rlx32((volatile TAny *)&a->value, (TUint32*)&oldval, (TUint32)newval);
 #elif defined(HAVE_WATCOM_ATOMICS)
     return (SDL_bool)_SDL_cmpxchg_watcom(&a->value, newval, oldval);
 #elif defined(HAVE_GCC_ATOMICS)
@@ -157,6 +164,8 @@ SDL_bool SDL_AtomicCASPtr(void **a, void *oldval, void *newval)
 {
 #if defined(HAVE_MSC_ATOMICS)
     return _InterlockedCompareExchangePointer(a, newval, oldval) == oldval;
+#elif defined(HAVE_E32_ATOMICS)
+    return (SDL_bool)__e32_atomic_cas_rlx_ptr(a, &oldval, newval);
 #elif defined(HAVE_WATCOM_ATOMICS)
     return (SDL_bool)_SDL_cmpxchg_watcom((int *)a, (long)newval, (long)oldval);
 #elif defined(HAVE_GCC_ATOMICS)
@@ -188,6 +197,8 @@ int SDL_AtomicSet(SDL_atomic_t *a, int v)
 #ifdef HAVE_MSC_ATOMICS
     SDL_COMPILE_TIME_ASSERT(atomic_set, sizeof(long) == sizeof(a->value));
     return _InterlockedExchange((long *)&a->value, v);
+#elif defined(HAVE_E32_ATOMICS)
+    return (int)__e32_atomic_swp_rlx32((volatile TAny *)&a->value, (TUint32)v);
 #elif defined(HAVE_WATCOM_ATOMICS)
     return _SDL_xchg_watcom(&a->value, v);
 #elif defined(HAVE_GCC_ATOMICS)
@@ -207,6 +218,8 @@ void *SDL_AtomicSetPtr(void **a, void *v)
 {
 #if defined(HAVE_MSC_ATOMICS)
     return _InterlockedExchangePointer(a, v);
+#elif defined(HAVE_E32_ATOMICS)
+    return __e32_atomic_swp_rlx_ptr(a, v);
 #elif defined(HAVE_WATCOM_ATOMICS)
     return (void *)_SDL_xchg_watcom((int *)a, (long)v);
 #elif defined(HAVE_GCC_ATOMICS)
@@ -227,6 +240,8 @@ int SDL_AtomicAdd(SDL_atomic_t *a, int v)
 #ifdef HAVE_MSC_ATOMICS
     SDL_COMPILE_TIME_ASSERT(atomic_add, sizeof(long) == sizeof(a->value));
     return _InterlockedExchangeAdd((long *)&a->value, v);
+#elif defined(HAVE_E32_ATOMICS)
+    return (int)__e32_atomic_add_rlx32((volatile TAny *)&a->value, (TUint32)v);
 #elif defined(HAVE_WATCOM_ATOMICS)
     return _SDL_xadd_watcom(&a->value, v);
 #elif defined(HAVE_GCC_ATOMICS)
@@ -249,6 +264,8 @@ int SDL_AtomicGet(SDL_atomic_t *a)
 {
 #ifdef HAVE_ATOMIC_LOAD_N
     return __atomic_load_n(&a->value, __ATOMIC_SEQ_CST);
+#elif defined(HAVE_E32_ATOMICS)
+    return (int)__e32_atomic_ior_rlx32((volatile TAny *)&a->value, 0);
 #elif defined(HAVE_MSC_ATOMICS)
     SDL_COMPILE_TIME_ASSERT(atomic_get, sizeof(long) == sizeof(a->value));
     return _InterlockedOr((long *)&a->value, 0);
@@ -279,6 +296,8 @@ void *SDL_AtomicGetPtr(void **a)
     return __sync_val_compare_and_swap(a, (void *)0, (void *)0);
 #elif defined(__SOLARIS__)
     return atomic_cas_ptr(a, (void *)0, (void *)0);
+#elif defined(HAVE_E32_ATOMICS)
+    return __e32_atomic_ior_rlx_ptr(a, 0);
 #else
     void *value;
     do {

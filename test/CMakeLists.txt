@@ -13,6 +13,10 @@ macro(add_sdl_test_executable TARGET)
     cmake_parse_arguments(AST "NONINTERACTIVE;NEEDS_RESOURCES" "" "" ${ARGN})
     add_executable(${TARGET} ${AST_UNPARSED_ARGUMENTS})
 
+    if(SYMBIAN)
+        post_link_exe(${TARGET} ${TARGET} a7015d12 a0005d12)
+    endif()
+
     list(APPEND SDL_TEST_EXECUTABLES ${TARGET})
     if(AST_NONINTERACTIVE)
         list(APPEND SDL_TESTS_NONINTERACTIVE ${TARGET})

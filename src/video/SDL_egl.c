@@ -66,6 +66,14 @@
 #define DEFAULT_OGL_ES_PVR (vc4 ? "libGLES_CM.so.1" : "libbrcmGLESv2.so")
 #define DEFAULT_OGL_ES     (vc4 ? "libGLESv1_CM.so.1" : "libbrcmGLESv2.so")
 
+#elif SDL_VIDEO_DRIVER_SYMBIAN
+/* Symbian */
+#define DEFAULT_EGL         "libEGL.dll"
+#define ALT_EGL             "libGLES_CM.dll"
+#define DEFAULT_OGL_ES2     "libGLESv2.dll"
+#define DEFAULT_OGL_ES_PVR  "libGLES_CM.dll"
+#define DEFAULT_OGL_ES      "libGLESv1_CM.dll"
+
 #elif SDL_VIDEO_DRIVER_ANDROID || SDL_VIDEO_DRIVER_VIVANTE
 /* Android */
 #define DEFAULT_EGL        "libEGL.so"

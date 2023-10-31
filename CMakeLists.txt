@@ -233,7 +233,7 @@ if(USE_GCC OR USE_CLANG OR USE_INTELCC)
 endif()
 
 # Default option knobs
-if(UNIX OR MINGW OR MSYS OR (USE_CLANG AND NOT WINDOWS) OR VITA OR PSP OR PS2 OR N3DS)
+if(UNIX OR MINGW OR MSYS OR (USE_CLANG AND NOT WINDOWS) OR VITA OR PSP OR PS2 OR N3DS OR SYMBIAN)
   set(OPT_DEF_LIBC ON)
 endif()
 
@@ -299,6 +299,8 @@ set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -D_GNU_SOURCE=1")
 # restore back to that afterwards. For check_function_exists() to work in
 # Emscripten, this value must be at its default value.
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+
+#message(FATAL_ERROR ${ORIG_CMAKE_REQUIRED_FLAGS})
 
 if(CYGWIN)
   # We build SDL on cygwin without the UNIX emulation layer
@@ -1060,7 +1062,7 @@ if(SDL_LIBC)
     check_symbol_exists(poll "poll.h" HAVE_POLL)
 
     check_library_exists(m pow "" HAVE_LIBM)
-    if(HAVE_LIBM)
+    if(HAVE_LIBM AND NOT SYMBIAN)
       set(CMAKE_REQUIRED_LIBRARIES m)
     endif()
     foreach(_FN
@@ -2421,6 +2423,60 @@ elseif(RISCOS)
     CheckOSS()
   endif()
 
+elseif(SYMBIAN)
+  # SDL_spinlock.c Needs to be compiled in ARM mode.
+  cmake_push_check_state(RESET)
+  #set(CMAKE_REQUIRED_FLAGS "-Werror=unused-command-line-argument")
+  check_c_compiler_flag(-marm HAVE_ARM_MODE)
+  if(HAVE_ARM_MODE)
+    set_property(SOURCE "${SDL2_SOURCE_DIR}/src/atomic/SDL_spinlock.c" APPEND_STRING PROPERTY COMPILE_FLAGS " -marm")
+  endif()
+  cmake_pop_check_state()
+
+  file(GLOB SYMBIAN_MAIN_SOURCES ${SDL2_SOURCE_DIR}/src/main/symbian/*.c)
+  set(SDLMAIN_SOURCES ${SDLMAIN_SOURCES} ${SYMBIAN_MAIN_SOURCES})
+
+  list(APPEND EXTRA_TEST_LIBS ${SYMBIAN_EXE_LIBS})
+
+  if(SDL_MISC)
+    file(GLOB MISC_SOURCES ${SDL2_SOURCE_DIR}/src/misc/symbian/*.c*)
+    list(APPEND SOURCE_FILES ${MISC_SOURCES})
+    set(HAVE_SDL_MISC TRUE)
+  endif()
+
+  if(SDL_AUDIO)
+    set(SDL_AUDIO_DRIVER_SYMBIAN 1)
+    file(GLOB SYMBIAN_AUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/symbian/symbian/*.c*)
+    list(APPEND SOURCE_FILES ${SYMBIAN_AUDIO_SOURCES})
+    set(HAVE_SDL_AUDIO TRUE)
+  endif()
+  if(SDL_POWER)
+    set(SDL_POWER_SYMBIAN 1)
+    file(GLOB SYMBIAN_POWER_SOURCES ${SDL2_SOURCE_DIR}/src/power/symbian/*.c*)
+    list(APPEND SOURCE_FILES ${SYMBIAN_POWER_SOURCES})
+    set(HAVE_SDL_POWER TRUE)
+  endif()
+  if(SDL_VIDEO)
+    set(SDL_VIDEO_SYMBIAN 1)
+    file(GLOB SYMBIAN_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/power/symbian/*.c*)
+    list(APPEND SOURCE_FILES ${SYMBIAN_VIDEO_SOURCES})
+    set(HAVE_SDL_VIDEO TRUE)
+
+    set(HAVE_OPENGLES TRUE)
+    set(SDL_VIDEO_OPENGL_ES 1)
+    set(SDL_VIDEO_RENDER_OGL_ES 1)
+    set(SDL_VIDEO_OPENGL_ES2 1)
+    set(SDL_VIDEO_RENDER_OGL_ES2 1)
+  endif()
+
+  set(SDL_THREADS 1)
+  set(SDL_THREAD_SYMBIAN 1)
+  file(GLOB SYMBIAN_THREAD_SOURCES ${SDL2_SOURCE_DIR}/src/thread/symbian/*.c*)
+  list(APPEND SOURCE_FILES ${SYMBIAN_THREAD_SOURCES})
+  set(HAVE_SDL_THREADS TRUE)
+
+  #post_link_shared(SDL2 SDL2 a0005d12 a0005d12 ${CMAKE_CURRENT_SOURCE_DIR}/symbian/SDL2.def)
+
 elseif(VITA)
   # SDL_spinlock.c Needs to be compiled in ARM mode.
   cmake_push_check_state(RESET)
@@ -3328,7 +3384,14 @@ if(SDL_SHARED)
   add_dependencies(SDL2 sdl_headers_copy)
   # alias target for in-tree builds
   add_library(SDL2::SDL2 ALIAS SDL2)
-  set_target_properties(SDL2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+  if (SYMBIAN)
+    set_target_properties(SDL2 PROPERTIES POSITION_INDEPENDENT_CODE FALSE)
+    target_compile_definitions(SDL2 PRIVATE SDL_USE_BUILTIN_OPENGL_DEFINITIONS)
+    set_target_properties(SDL2 PROPERTIES DEFINE_SYMBOL DLL_EXPORT)
+    set_target_properties(SDL2 PROPERTIES LINK_FLAGS "-Wl,-soname,SDL2{000a0000}[a0005d12].dll")
+  else()
+    set_target_properties(SDL2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+  endif()
   set_target_properties(SDL2 PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS FALSE)
   if(NOT SDL_LIBC)
     if(SDL_CPU_X86)
@@ -3372,7 +3435,7 @@ if(SDL_SHARED)
     set_property(TARGET SDL2 APPEND_STRING PROPERTY STATIC_LIBRARY_FLAGS " /NODEFAULTLIB")
   endif()
   # FIXME: if CMAKE_VERSION >= 3.13, use target_link_options for EXTRA_LDFLAGS
-  target_link_libraries(SDL2 PRIVATE ${EXTRA_LIBS} ${EXTRA_LDFLAGS} ${EXTRA_LDFLAGS_BUILD} ${CMAKE_DEPENDS})
+  target_link_libraries(SDL2 PRIVATE ${SYMBIAN_SHARED_LIBS} ${EXTRA_LIBS} ${EXTRA_LDFLAGS} ${EXTRA_LDFLAGS_BUILD} ${CMAKE_DEPENDS})
   target_include_directories(SDL2 PUBLIC
       "$<BUILD_INTERFACE:${SDL2_BINARY_DIR}/include>"
       "$<BUILD_INTERFACE:${SDL2_BINARY_DIR}/include/SDL2>"
@@ -3406,6 +3469,9 @@ if(SDL_STATIC)
     OUTPUT_NAME "${sdl_static_libname}"
     POSITION_INDEPENDENT_CODE "${SDL_STATIC_PIC}")
   target_compile_definitions(SDL2-static PRIVATE SDL_STATIC_LIB)
+  if (SYMBIAN)
+    #target_compile_definitions(SDL2-static PRIVATE SDL_USE_BUILTIN_OPENGL_DEFINITIONS)
+  endif()
   # TODO: Win32 platforms keep the same suffix .lib for import and static
   # libraries - do we need to consider this?
   target_link_libraries(SDL2-static PRIVATE ${EXTRA_LIBS} ${EXTRA_LDFLAGS} ${CMAKE_DEPENDS})

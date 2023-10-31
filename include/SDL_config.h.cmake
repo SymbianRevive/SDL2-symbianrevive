@@ -54,7 +54,7 @@
 /* Useful headers */
 #cmakedefine STDC_HEADERS 1
 #cmakedefine HAVE_ALLOCA_H 1
-#cmakedefine HAVE_CTYPE_H 1
+#cmakedefine HAVE_CTYPE_H 0
 #cmakedefine HAVE_FLOAT_H 1
 #cmakedefine HAVE_ICONV_H 1
 #cmakedefine HAVE_INTTYPES_H 1
@@ -385,6 +385,7 @@
 #cmakedefine SDL_THREAD_WINDOWS @SDL_THREAD_WINDOWS@
 #cmakedefine SDL_THREAD_OS2 @SDL_THREAD_OS2@
 #cmakedefine SDL_THREAD_VITA @SDL_THREAD_VITA@
+#cmakedefine SDL_THREAD_SYMBIAN @SDL_THREAD_SYMBIAN@
 #cmakedefine SDL_THREAD_PSP @SDL_THREAD_PSP@
 #cmakedefine SDL_THREAD_PS2 @SDL_THREAD_PS2@
 #cmakedefine SDL_THREAD_N3DS @SDL_THREAD_N3DS@

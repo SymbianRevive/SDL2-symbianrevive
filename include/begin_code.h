@@ -51,10 +51,11 @@
 
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
-# if defined(__WIN32__) || defined(__WINRT__) || defined(__CYGWIN__) || defined(__GDK__)
+# if defined(__WIN32__) || defined(__WINRT__) || defined(__CYGWIN__) || defined(__GDK__) || defined(__SYMBIAN32__)
 #  ifdef DLL_EXPORT
 #   define DECLSPEC __declspec(dllexport)
 #  else
+#   warning "Not Exporting"
 #   define DECLSPEC
 #  endif
 # elif defined(__OS2__)
@@ -86,11 +87,14 @@
 #endif
 #endif /* SDLCALL */
 
+/* What a load of lies lol */
+#if 0
 /* Removed DECLSPEC on Symbian OS because SDL cannot be a DLL in EPOC */
 #ifdef __SYMBIAN32__
 #undef DECLSPEC
 #define DECLSPEC
 #endif /* __SYMBIAN32__ */
+#endif
 
 /* Force structure packing at 4 byte alignment.
    This is necessary if the header is included in code which has structure

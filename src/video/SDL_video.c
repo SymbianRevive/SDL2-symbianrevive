@@ -44,7 +44,13 @@
 
 /* GL and GLES2 headers conflict on Linux 32 bits */
 #if SDL_VIDEO_OPENGL_ES2 && !SDL_VIDEO_OPENGL
+#ifdef __SYMBIAN32__
+#define glTexImage2D glTexImage2D2
+#endif
 #include "SDL_opengles2.h"
+#ifdef __SYMBIAN32__
+#undef glTexImage2D 
+#endif
 #endif /* SDL_VIDEO_OPENGL_ES2 && !SDL_VIDEO_OPENGL */
 
 #if !SDL_VIDEO_OPENGL
