@@ -10,8 +10,6 @@ endif()
 
 set(SYMBIAN_SUPPORT_ROOT ${CMAKE_SOURCE_DIR}/symbian)
 
-find_program(ELF2E32 elf2e32 REQUIRED)
-
 set(CMAKE_C_COMPILER_WORKS    1)
 set(CMAKE_CXX_COMPILER_WORKS  1)
 set(CMAKE_CXX_STANDARD        14)
@@ -44,18 +42,15 @@ set(SYMBIAN_SDK_PATH	$ENV{EPOCROOT} CACHE STRING "Symbian SDK root directory")
 set(SYMBIAN_EPOCROOT	${SYMBIAN_SDK_PATH}/epoc32)
 set(SYMBIAN_TOOLROOT	"${SYMBIAN_EPOCROOT}/tools" CACHE STRING "Symbian tools root directory")
 
-#set(ENV{EPOCROOT} "${SYMBIAN_SDK_PATH}")
-
 set(SYMBIAN_GCCE_SUPPORT_HEADER "${SYMBIAN_EPOCROOT}/include/gcce/gcce.h" CACHE STRING "Symbian GCCE support header")
 
 set(GCCE_VERSION			"12.1.0" CACHE STRING "ARM ELF compiler version")
 set(GCCE_BASE				  "" CACHE STRING "ARM ELF compiler path")
 set(CROSS_COMPILER_PREFIX	"${GCCE_BASE}/bin/arm-none-symbianelf-" CACHE STRING "Cross compiler prefix")
 
-set(TOOL_OS_SUFFIX "")
-if(CMAKE_HOST_WIN32)
-  set(TOOL_OS_SUFFIX ".exe")
-endif()
+set(TOOL_OS_SUFFIX ".exe")
+
+find_program(ELF2E32 elf2e32${TOOL_OS_SUFFIX} REQUIRED)
 
 set(CMAKE_C_COMPILER "${CROSS_COMPILER_PREFIX}gcc${TOOL_OS_SUFFIX}")
 set(CMAKE_CXX_COMPILER "${CROSS_COMPILER_PREFIX}g++${TOOL_OS_SUFFIX}")
