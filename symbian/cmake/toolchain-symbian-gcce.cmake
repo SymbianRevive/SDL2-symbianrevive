@@ -28,13 +28,6 @@ set(CMAKE_DL_LIBS "")
 set(CMAKE_SYSTEM_NAME "Symbian")
 
 
-#INCLUDE(CMakeForceCompiler)
-# 
-#SET(CMAKE_SYSTEM_PROCESSOR arm)
-# 
-#set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
-
-
 set(CMAKE_FIND_LIBRARY_PREFIXES "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".dso")
 
@@ -198,19 +191,14 @@ function(post_link_exe ONAME INAME UID3 SID)
   )
 endfunction()
 
-find_program(PERL perl)
-
 function(post_link_shared ONAME INAME UID3 SID DEFFILE)
   add_custom_target(${ONAME}-dll ALL
-      #COMMAND ${PERL} ${SYMBIAN_TOOLROOT}/elf2inf.pl -output ${ONAME}.inf $<TARGET_FILE:${INAME}>
-      #COMMAND ${PERL} ${SYMBIAN_TOOLROOT}/makedef.pl -Inffile ${ONAME}.inf -Frzfile ${ONAME}.def
       COMMAND ${ELF2E32} ${ELF2E32_EXTRA_FLAGS}
                          --capability="LocalServices+ReadUserData+UserEnvironment+WriteUserData+NetworkServices"
                          --elfinput=$<TARGET_FILE:${INAME}> --output="${ONAME}.dll" --libpath="${SYMBIAN_LIB_DIR}" --linkas="${ONAME}{000a0000}[${UID3}].dll"
                          --fpu=softfp --uid1=0x10000079 --uid2=0x1000008d --uid3=0x${UID3} --sid=0x${SID} --targettype=DLL
                          --dlldata --ignorenoncallable --smpsafe --heap=0x800000,0x3000000 --stack=0x10000
                          --compressionmethod=inflate --dso=${ONAME}.dso --defoutput=${ONAME}.def --namedlookup
-      #COMMAND_EXPAND_LISTS
     DEPENDS "${INAME}"
   )
 endfunction()
