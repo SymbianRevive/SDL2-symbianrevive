@@ -20,8 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include "appui.h"
-#include "container.h"
+#include "SDL_symbianappui.h"
+#include "SDL_symbiancontainer.h"
 
 #include <e32const.h>
 

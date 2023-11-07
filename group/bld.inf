@@ -1,5 +1,6 @@
 PRJ_MMPFILES
 ..\SDL2.mmp
+..\SDL2_main.mmp
 
 PRJ_EXPORTS
 ..\include\begin_code.h			SDL2\begin_code.h

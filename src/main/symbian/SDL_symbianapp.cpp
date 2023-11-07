@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 #include "SDL_symbian_main.h"
-#include "document.h"
+#include "SDL_symbiandocument.h"
 
 #include <eikstart.h>
 #include <apparc.h>

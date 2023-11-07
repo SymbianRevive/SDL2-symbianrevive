@@ -55,7 +55,6 @@
 #  ifdef DLL_EXPORT
 #   define DECLSPEC __declspec(dllexport)
 #  else
-#   warning "Not Exporting"
 #   define DECLSPEC
 #  endif
 # elif defined(__OS2__)

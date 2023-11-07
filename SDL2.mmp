@@ -143,4 +143,4 @@ SOURCE		locale/dummy/SDL_syslocale.c
 SYSTEMINCLUDE	/epoc32/include /epoc32/include /epoc32/include/stdapis/stlportv5 /epoc32/include/stdapis /epoc32/include/mw /epoc32/include/platform /epoc32/include/platform/mw symbian/sympathy
 USERINCLUDE	include src/main/symbian symbian
 
-MACRO		_UNICODE UNICODE
+MACRO		_UNICODE UNICODE SDL_STATIC_LIB
