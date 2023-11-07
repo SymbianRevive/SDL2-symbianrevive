@@ -1,0 +1,14 @@
+TARGET          SDL2_main.lib
+TARGETTYPE      lib
+
+SOURCEPATH	src
+
+SOURCE		main/symbian/SDL_symbianapp.cpp
+SOURCE		main/symbian/SDL_symbianappui.cpp
+SOURCE		main/symbian/SDL_symbiancontainer.cpp
+SOURCE		main/symbian/SDL_symbiandocument.cpp
+
+SYSTEMINCLUDE	/epoc32/include /epoc32/include /epoc32/include/stdapis/stlportv5 /epoc32/include/stdapis /epoc32/include/mw /epoc32/include/platform /epoc32/include/platform/mw symbian/sympathy
+USERINCLUDE	include src/main/symbian symbian
+
+MACRO		_UNICODE UNICODE SDL_STATIC_LIB
