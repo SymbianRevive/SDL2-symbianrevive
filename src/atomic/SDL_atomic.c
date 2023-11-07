@@ -35,11 +35,10 @@
 #include <atomic.h>
 #endif
 
-#if defined(__SYMBIAN32__) && defined(__SERIES60_3X__)
+#if defined(__SYMBIAN32__)
 #include <e32atomics.h>
 #define HAVE_E32_ATOMICS
-#endif
-
+#else
 /* The __atomic_load_n() intrinsic showed up in different times for different compilers. */
 #if defined(__clang__)
 #if __has_builtin(__atomic_load_n) || defined(HAVE_GCC_ATOMICS)
@@ -54,6 +53,8 @@
 #define HAVE_ATOMIC_LOAD_N 1
 #endif
 #endif
+#endif
+
 
 /* *INDENT-OFF* */ /* clang-format off */
 #if defined(__WATCOMC__) && defined(__386__)

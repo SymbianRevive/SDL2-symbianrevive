@@ -48,7 +48,7 @@
 #include <libkern/OSAtomic.h>
 #endif
 
-#if defined(__SYMBIAN32__) && defined(__SERIES60_3X__)
+#if defined(__SYMBIAN32__)
 #include <e32atomics.h>
 #endif
 
@@ -85,7 +85,7 @@ SDL_bool SDL_AtomicTryLock(SDL_SpinLock *lock)
         return SDL_FALSE;
     }
 
-#elif defined(__SYMBIAN32__) && defined(__SERIES60_3X__)
+#elif defined(__SYMBIAN32__)
     return __e32_atomic_swp_rlx32(lock, 1) == 0;
 
 #elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
@@ -193,7 +193,7 @@ void SDL_AtomicLock(SDL_SpinLock *lock)
 
 void SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
-#if defined(__SYMBIAN32__) && defined(__SERIES60_3X__)
+#if defined(__SYMBIAN32__)
     __e32_atomic_store_ord32(lock, 0);
 
 #elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET

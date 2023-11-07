@@ -50,7 +50,6 @@
 #elif defined(__NGAGE__)
 #include "SDL_config_ngage.h"
 #elif defined(__SYMBIAN32__)
-#error 1
 #include "SDL_config_symbian.h"
 #else
 #error 1

@@ -91,7 +91,7 @@ int SDL_TryLockMutex(SDL_mutex *mutex)
 
     RMutex rmutex;
     rmutex.SetHandle(mutex->handle);
-    rmutex.Poll();
+    rmutex.IsHeld();
 
     return 0;
 }
